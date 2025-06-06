@@ -6,376 +6,711 @@
     <title>Monthly Expense Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #1c1c1c; color: #ffffff; line-height: 1.6; }
-        .container { display: flex; justify-content: space-around; margin-top: 20px; padding: 0 20px; }
-        .column { width: 48%; padding: 20px; border: 1px solid #333; border-radius: 8px; background-color: #2a2a2a; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        h1 { text-align: center; color: #4CAF50; margin-top: 20px; margin-bottom: 30px; }
-        h2 { text-align: center; color: #FFA726; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        h3 { color: #B39DDB; margin-top: 20px; margin-bottom: 10px; }
-        .totals { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.1em; }
-        input[type="number"], input[type="text"] { padding: 10px; margin-bottom: 10px; border: none; border-radius: 4px; background-color: #333; color: #ffffff; width: calc(100% - 22px); display: block; box-sizing: border-box; }
-        button { padding: 10px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease; margin-top: 10px; }
-        button:hover { background-color: #388E3C; }
-        ul { list-style: none; padding: 0; margin: 0; }
-        li { background-color: #333; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        li span { font-weight: bold; color: #B39DDB; }
-        .payout-section { text-align: center; margin-bottom: 20px; padding: 15px; background-color: #2a2a2a; border: 1px solid #333; border-radius: 8px; margin: 20px auto; width: fit-content; }
-        .payout-section label { font-size: 1.1em; margin-right: 10px; color: #B39DDB; }
-        .payout-section input[type="number"] { width: 150px; display: inline-block; margin-bottom: 0; margin-right: 10px; }
-        .payout-section button { margin-top: 0; }
-
-        .savings-balance { 
-            width: 96%; 
-            margin: 20px auto; 
-            padding: 15px; 
-            border: 1px solid #333; 
-            border-radius: 8px; 
-            background-color: #2a2a2a; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
-        .savings-balance .total-row { 
-            font-size: 1.2em; 
-            font-weight: bold; 
-            color: #4CAF50;
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #475569;
+            --success-color: #059669;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --background-color: #0f172a;
+            --surface-color: #1e293b;
+            --card-color: #334155;
+            --text-color: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --hover-color: #334155;
+            --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
-        .month-selector {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            background: var(--gradient-primary);
+            padding: 2rem 0;
             text-align: center;
-            margin: 20px auto;
-            padding: 15px;
-            background-color: #2a2a2a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            width: fit-content;
-        }
-        .month-selector input[type="month"] {
-            padding: 8px;
-            margin: 0 10px;
-            background-color: #333;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-        }
-        .history-section {
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #2a2a2a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            width: 90%;
-        }
-        .history-section h2 {
-            color: #4CAF50;
-        }
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        .history-table th, .history-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-        .history-table th {
-            background-color: #333;
-            color: #4CAF50;
-        }
-        .savings-graph {
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #2a2a2a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            width: 90%;
-        }
-        .savings-graph h2 {
-            color: #4CAF50;
-        }
-        .graph-container {
-            height: 300px;
-            margin-top: 20px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
         }
 
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .control-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .expense-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .expense-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .expense-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .expense-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .budget-info {
+            text-align: right;
+        }
+
+        .budget-amount {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        .budget-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--card-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            min-height: 36px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: end;
+        }
+
+        .input-group .form-input {
+            flex: 1;
+        }
+
+        .expense-list {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .expense-item {
+            background: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .expense-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .expense-details {
+            flex: 1;
+        }
+
+        .expense-name {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .expense-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        .expense-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .summary-section {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-item {
+            background: var(--card-color);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        .chart-container {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .chart-wrapper {
+            height: 400px;
+            margin-top: 1rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .close-modal:hover {
+            color: var(--text-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: var(--text-color);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .history-button {
+            margin-bottom: 1rem;
+        }
+
+        .carry-over-info {
+            background: var(--card-color);
+            border: 1px solid var(--success-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .carry-over-info.show {
+            display: block;
+        }
+
+        .carry-over-amount {
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .expense-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .toast {
+                left: 1rem;
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Monthly Subscriptions and Expenses</h1>
-
-    <div class="month-selector">
-        <label for="month-select">Select Month:</label>
-        <input type="month" id="month-input">
+    <div class="app-header">
+        <h1 class="app-title">Monthly Expense Tracker</h1>
+        <p class="app-subtitle">Take control of your finances with the 50/30/20 budgeting rule</p>
     </div>
 
-    <div class="payout-section">
-        <label for="salary">Monthly Payout:</label>
-        <input type="number" id="salary" value="0"> <!-- Default value from image was 420, setting to 0 for fresh start -->
-        <label for="extra-payout">Add Extra Payout:</label>
-        <input type="number" id="extra-payout" value="0">
-        <button id="add-extra-payout">Add Payout</button>
-    </div>
-
-    <div class="container">
-        <div class="column">
-            <h2 id="needs-heading">Needs (50%) - <span>Calculated Amount</span> <span class="currency">jd</span></h2>
-            <p><em>Examples: Rent, Groceries, Utilities, Transportation, Loan Payments, Insurance</em></p>
-            <ul id="needs-list">
-                <!-- Needs expenses will go here -->
-            </ul>
-            <div>
-                <h3>Add Needs Expense</h3>
-                <input type="text" id="needs-expense-name" placeholder="Expense Name">
-                <input type="number" id="needs-expense-amount" placeholder="Amount">
-                <button id="add-needs-expense">Add Expense</button>
+    <div class="main-container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="control-card">
+                <div class="card-title">
+                    📅 Month Selection
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="month-input">Select Month:</label>
+                    <input type="month" id="month-input" class="form-input">
+                </div>
+                <button id="view-history" class="btn btn-primary history-button">📊 View Past Expenses</button>
             </div>
 
-            <div class="totals">
-                <div class="total-row">
-                    <span>Total:</span> <span id="needs-total">0<span class="currency">jd</span></span> 
+            <div class="control-card">
+                <div class="card-title">
+                    💰 Monthly Income
                 </div>
-                <div class="total-row">
-                    <span>Left:</span> <span id="needs-left">0<span class="currency">jd</span></span> 
+                <div class="input-group">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="salary">Base Salary:</label>
+                        <input type="number" id="salary" class="form-input" value="0" min="0" step="0.01">
+                    </div>
+                    <button id="update-salary" class="btn btn-success">Update</button>
+                </div>
+                <div class="input-group">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="extra-payout">Extra Income:</label>
+                        <input type="number" id="extra-payout" class="form-input" value="0" min="0" step="0.01">
+                    </div>
+                    <button id="add-extra-payout" class="btn btn-success">Add</button>
                 </div>
             </div>
-        </div>
 
-        <div class="column">
-            <h2 id="wants-heading">Wants (30%) - <span>Calculated Amount</span> <span class="currency">jd</span></h2>
-            <p><em>Examples: Entertainment, Dining Out, Hobbies, Subscriptions (streaming, gym), New Gadgets</em></p>
-            <ul id="wants-list">
-                <!-- Wants expenses will go here -->
-            </ul>
-            <div>
-                <h3>Add Wants Expense</h3>
-                <input type="text" id="wants-expense-name" placeholder="Expense Name">
-                <input type="number" id="wants-expense-amount" placeholder="Amount">
-                <button id="add-wants-expense">Add Expense</button>
-            </div>
-
-            <div class="totals">
-                 <div class="total-row">
-                    <span>Total:</span> <span id="wants-total">0<span class="currency">jd</span></span> 
+            <div class="control-card">
+                <div class="card-title">
+                    🌍 Currency
                 </div>
-                <div class="total-row">
-                    <span>Left:</span> <span id="wants-left">0<span class="currency">jd</span></span> 
+                <div class="form-group">
+                    <label class="form-label" for="currency-select">Select Currency:</label>
+                    <select id="currency-select" class="form-input">
+                        <option value="jd">JD (Jordanian Dinar)</option>
+                        <option value="$">USD ($)</option>
+                        <option value="€">EUR (€)</option>
+                        <option value="£">GBP (£)</option>
+                    </select>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="savings-balance">
-        <div class="total-row">
-            <span>Savings (20%):</span> <span id="savings-amount">0</span> <span class="currency">jd</span>
+        <!-- Carry Over Info -->
+        <div id="carry-over-info" class="carry-over-info">
+            <p>💰 <strong>Carry Over from Previous Month:</strong> <span id="carry-over-amount" class="carry-over-amount">0 JD</span></p>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">This amount has been added to your current balance from unspent budget last month.</p>
         </div>
-        <div class="total-row">
-            <span>Balance:</span> <span id="balance">0</span> <span class="currency">jd</span>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <div class="card-title">📊 Budget Overview</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Total Income</div>
+                    <div class="summary-value" id="total-income">0 JD</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Needs Budget (50%)</div>
+                    <div class="summary-value" id="needs-budget">0 JD</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Wants Budget (30%)</div>
+                    <div class="summary-value" id="wants-budget">0 JD</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Savings (20%)</div>
+                    <div class="summary-value" id="savings-amount">0 JD</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Current Balance</div>
+                    <div class="summary-value" id="balance">0 JD</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Savings</div>
+                    <div class="summary-value" id="total-savings">0 JD</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Cards -->
+        <div class="expense-grid">
+            <!-- Needs Card -->
+            <div class="expense-card">
+                <div class="expense-header">
+                    <div>
+                        <div class="expense-title">🏠 Needs (50%)</div>
+                        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">
+                            Rent, Groceries, Utilities, Transportation, Insurance
+                        </p>
+                    </div>
+                    <div class="budget-info">
+                        <div class="budget-amount" id="needs-budget-display">0 JD</div>
+                        <div class="budget-label">Budget</div>
+                    </div>
+                </div>
+
+                <ul class="expense-list" id="needs-list"></ul>
+
+                <div class="input-group">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <input type="text" id="needs-expense-name" class="form-input" placeholder="Expense name">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <input type="number" id="needs-expense-amount" class="form-input" placeholder="Amount" min="0" step="0.01">
+                    </div>
+                    <button id="add-needs-expense" class="btn btn-primary">Add</button>
+                </div>
+
+                <div class="summary-grid" style="grid-template-columns: 1fr 1fr; margin-top: 1rem;">
+                    <div class="summary-item">
+                        <div class="summary-label">Spent</div>
+                        <div class="summary-value" id="needs-total">0 JD</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Remaining</div>
+                        <div class="summary-value" id="needs-left">0 JD</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wants Card -->
+            <div class="expense-card">
+                <div class="expense-header">
+                    <div>
+                        <div class="expense-title">🎯 Wants (30%)</div>
+                        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">
+                            Entertainment, Dining Out, Hobbies, Subscriptions
+                        </p>
+                    </div>
+                    <div class="budget-info">
+                        <div class="budget-amount" id="wants-budget-display">0 JD</div>
+                        <div class="budget-label">Budget</div>
+                    </div>
+                </div>
+
+                <ul class="expense-list" id="wants-list"></ul>
+
+                <div class="input-group">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <input type="text" id="wants-expense-name" class="form-input" placeholder="Expense name">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <input type="number" id="wants-expense-amount" class="form-input" placeholder="Amount" min="0" step="0.01">
+                    </div>
+                    <button id="add-wants-expense" class="btn btn-primary">Add</button>
+                </div>
+
+                <div class="summary-grid" style="grid-template-columns: 1fr 1fr; margin-top: 1rem;">
+                    <div class="summary-item">
+                        <div class="summary-label">Spent</div>
+                        <div class="summary-value" id="wants-total">0 JD</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Remaining</div>
+                        <div class="summary-value" id="wants-left">0 JD</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Management -->
+        <div class="control-card" style="margin-bottom: 2rem;">
+            <div class="card-title">💳 Savings Management</div>
+            <div class="input-group">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="withdraw-amount">Withdraw Amount:</label>
+                    <input type="number" id="withdraw-amount" class="form-input" value="0" min="0" step="0.01">
+                </div>
+                <button id="withdraw-button" class="btn btn-danger">Withdraw</button>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-container">
+            <div class="card-title">📈 Savings History</div>
+            <div class="chart-wrapper">
+                <canvas id="savingsChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <div class="payout-section">
-        <label for="withdraw-amount">Withdraw from Savings:</label>
-        <input type="number" id="withdraw-amount" value="0">
-        <button id="withdraw-button">Withdraw</button>
-    </div>
-
-    <div class="savings-graph">
-        <h2>Savings History</h2>
-        <div class="graph-container">
-            <canvas id="savingsChart"></canvas>
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Modal Title</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body"></div>
         </div>
     </div>
 
-    <div class="history-section">
-        <h2>Expense History</h2>
-        <table class="history-table">
-            <thead>
-                <tr>
-                    <th>Month</th>
-                    <th>Total Income</th>
-                    <th>Needs Total</th>
-                    <th>Wants Total</th>
-                    <th>Savings</th>
-                </tr>
-            </thead>
-            <tbody id="history-body">
-                <!-- History rows will be populated by JavaScript -->
-            </tbody>
-        </table>
-    </div>
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
 
     <script>
+        // Global variables
+        let currentMonth = '';
+        let monthlyData = JSON.parse(localStorage.getItem('monthlyExpenseData') || '{}');
+        let needsExpenses = [];
+        let wantsExpenses = [];
+        let savingsChart;
+        
+        // DOM elements
+        const monthInput = document.getElementById('month-input');
         const salaryInput = document.getElementById('salary');
-        const needsHeading = document.getElementById('needs-heading').querySelector('span');
-        const wantsHeading = document.getElementById('wants-heading').querySelector('span');
-        const savingsAmountSpan = document.getElementById('savings-amount');
-        const balanceSpan = document.getElementById('balance');
+        const updateSalaryButton = document.getElementById('update-salary');
         const extraPayoutInput = document.getElementById('extra-payout');
         const addExtraPayoutButton = document.getElementById('add-extra-payout');
-        const monthInput = document.getElementById('month-input');
+        const currencySelect = document.getElementById('currency-select');
         const withdrawAmountInput = document.getElementById('withdraw-amount');
         const withdrawButton = document.getElementById('withdraw-button');
-
-        // Add new variables for month management
-        let currentMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
-        let monthlyData = {};
-        let savingsChart;
-        const currencySpan = document.querySelectorAll('.currency');
-        const availableCurrencies = ['jd', '$', '€', '£']; // Add more currencies here
-
-        // Initialize the month selector (now using month input)
-        function initializeMonthInput() {
-            // Set the initial value of the month input to the current month
-            const today = new Date();
-            const month = (today.getMonth() + 1).toString().padStart(2, '0');
-            const year = today.getFullYear();
-            monthInput.value = `${year}-${month}`;
-            currentMonth = new Date(monthInput.value + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
-
-            // Ensure current month exists in data
-            if (!monthlyData[currentMonth]) {
-                 monthlyData[currentMonth] = {
-                    needsExpenses: [],
-                    wantsExpenses: [],
-                    salary: 0,
-                    savingsBalance: 0, // Initialize savings balance for the month
-                    currency: 'jd' // Default currency
-                };
-            }
-            loadMonthData(); // Load data for the initially selected month
-        }
-
-        // Load data for selected month from month input
-        function loadMonthData() {
-            const [year, month] = monthInput.value.split('-');
-            currentMonth = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long', year: 'numeric' });
-
-            // If the month doesn't exist in monthlyData, create it
-            if (!monthlyData[currentMonth]) {
-                 monthlyData[currentMonth] = {
-                    needsExpenses: [],
-                    wantsExpenses: [],
-                    salary: 0,
-                    savingsBalance: 0,
-                    currency: monthlyData[Object.keys(monthlyData)[0]]?.currency || 'jd' // Use currency from first month if available, otherwise default
-                };
-            }
-
-            const monthData = monthlyData[currentMonth];
-
-            // Update salary input field
-            salaryInput.value = monthData.salary || 0;
-            extraPayoutInput.value = '0'; // Clear extra payout input on month change
-
-            // Update expenses
-            needsExpenses = monthData.needsExpenses || [];
-            wantsExpenses = monthData.wantsExpenses || [];
-
-            // Update UI
-            renderExpenses(needsList, needsExpenses);
-            renderExpenses(wantsList, wantsExpenses);
-            calculateAndDisplay(); // This updates budgets, not balance directly
-            updateTotals();
-
-            // Update balance with saved savings balance, adding initial salary if it hasn't been added
-            const savedBalance = monthData.savingsBalance || 0;
-            const initialSalary = monthData.salary || 0;
-            // Only add initial salary to balance if balance is 0 (assuming balance is 0 for a new month)
-            if (savedBalance === 0 && initialSalary > 0) {
-                 balanceSpan.textContent = initialSalary.toFixed(2) + ' ' + (monthlyData[currentMonth]?.currency || 'jd');
-                 monthlyData[currentMonth].savingsBalance = parseFloat(balanceSpan.textContent); // Save the initial balance
-            } else {
-                balanceSpan.textContent = savedBalance.toFixed(2) + ' ' + (monthlyData[currentMonth]?.currency || 'jd');
-            }
-
-            withdrawAmountInput.value = '0'; // Clear withdraw input on month change
-
-            // Update currency display
-            updateCurrencyDisplay(monthData.currency || 'jd');
-
-            updateHistoryTable();
-            updateSavingsGraph();
-        }
-
-        // Save current month data
-        function saveMonthData() {
-            monthlyData[currentMonth] = {
-                needsExpenses: needsExpenses,
-                wantsExpenses: wantsExpenses,
-                salary: parseFloat(salaryInput.value) || 0,
-                savingsBalance: parseFloat(balanceSpan.textContent) || 0, // Save the current balance
-                currency: monthlyData[currentMonth]?.currency || 'jd' // Save the current currency
-            };
-            updateHistoryTable();
-            updateSavingsGraph();
-        }
-
-        function calculateAndDisplay() {
-            const salary = parseFloat(salaryInput.value) || 0;
-            // The total payout is the initial salary plus any extra payouts added.
-            const totalPayout = salary;
-
-            const needs = totalPayout * 0.50;
-            const wants = totalPayout * 0.30;
-            const savings = totalPayout * 0.20;
-
-            needsHeading.textContent = needs.toFixed(2);
-            wantsHeading.textContent = wants.toFixed(2);
-            // savingsAmountSpan.textContent = savings.toFixed(2); // This was confusing, removing it
-
-            // TODO: Implement logic to calculate total and left for Needs and Wants
-        }
-
-        // Calculate when salary input changes - This now handles initial salary and updates balance
-        salaryInput.addEventListener('input', () => {
-            const oldSalary = monthlyData[currentMonth]?.salary || 0; // Get salary before change
-            const newSalary = parseFloat(salaryInput.value) || 0;
-            const salaryDifference = newSalary - oldSalary;
-
-            // Update salary in monthlyData immediately
-            monthlyData[currentMonth].salary = newSalary;
-
-            // Add the difference to the balance
-            const currentBalanceText = balanceSpan.textContent.replace(/[^0-9.-]+/g, ""); // Remove currency for calculation
-            const currentBalance = parseFloat(currentBalanceText) || 0;
-            const newBalance = currentBalance + salaryDifference;
-            balanceSpan.textContent = newBalance.toFixed(2); // Update only the number
-            // currency display is handled by updateCurrencyDisplay for the balance span
-
-            // Recalculate budgets based on new total salary
-            calculateAndDisplay();
-            updateTotals();
-            saveMonthData(); // Save data when salary changes
-        });
-
-        // Modified addExtraPayoutButton listener
-        addExtraPayoutButton.addEventListener('click', () => {
-            const extraAmount = parseFloat(extraPayoutInput.value) || 0;
-            if (extraAmount > 0) {
-                // Add extra payout to the current month's salary in monthlyData
-                monthlyData[currentMonth].salary = (monthlyData[currentMonth].salary || 0) + extraAmount;
-                salaryInput.value = monthlyData[currentMonth].salary.toFixed(2);
-
-                // Add extra payout directly to the balance as well
-                const currentBalanceText = balanceSpan.textContent.replace(/[^0-9.-]+/g, ""); // Remove currency for calculation
-                const currentBalance = parseFloat(currentBalanceText) || 0;
-                const newBalance = currentBalance + extraAmount;
-                 balanceSpan.textContent = newBalance.toFixed(2); // Update only the number
-                 // currency display is handled by updateCurrencyDisplay for the balance span
-
-                calculateAndDisplay(); // Recalculate budgets based on new total salary
-                updateTotals(); // Update totals and left amounts
-                saveMonthData(); // Save the updated data
-                extraPayoutInput.value = '0'; // Clear the extra payout field
-            }
-        });
-
+        const viewHistoryButton = document.getElementById('view-history');
+        
+        // Expense elements
         const needsList = document.getElementById('needs-list');
         const wantsList = document.getElementById('wants-list');
-        const needsTotalSpan = document.getElementById('needs-total');
-        const needsLeftSpan = document.getElementById('needs-left');
-        const wantsTotalSpan = document.getElementById('wants-total');
-        const wantsLeftSpan = document.getElementById('wants-left');
         const needsExpenseNameInput = document.getElementById('needs-expense-name');
         const needsExpenseAmountInput = document.getElementById('needs-expense-amount');
         const addNeedsExpenseButton = document.getElementById('add-needs-expense');
@@ -383,142 +718,384 @@
         const wantsExpenseAmountInput = document.getElementById('wants-expense-amount');
         const addWantsExpenseButton = document.getElementById('add-wants-expense');
 
-        let needsExpenses = [];
-        let wantsExpenses = [];
+        // Initialize app
+        function initializeApp() {
+            initializeMonthInput();
+            initializeSavingsChart();
+            setupEventListeners();
+            loadMonthData();
+        }
 
-        function renderExpenses(listElement, expenses) {
-            listElement.innerHTML = '';
-            const currentCurrency = monthlyData[currentMonth]?.currency || 'jd';
-            expenses.forEach(expense => {
-                const li = document.createElement('li');
-                li.textContent = `${expense.name}: ${expense.amount.toFixed(2)} ${currentCurrency}`;
-                listElement.appendChild(li);
+        // Initialize month input
+        function initializeMonthInput() {
+            const today = new Date();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const year = today.getFullYear();
+            monthInput.value = `${year}-${month}`;
+            currentMonth = new Date(monthInput.value + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            monthInput.addEventListener('change', loadMonthData);
+            updateSalaryButton.addEventListener('click', handleSalaryUpdate);
+            addExtraPayoutButton.addEventListener('click', handleExtraPayout);
+            currencySelect.addEventListener('change', handleCurrencyChange);
+            withdrawButton.addEventListener('click', handleWithdrawal);
+            addNeedsExpenseButton.addEventListener('click', () => addExpense('needs'));
+            addWantsExpenseButton.addEventListener('click', () => addExpense('wants'));
+            viewHistoryButton.addEventListener('click', showExpenseHistory);
+            
+            // Enter key handlers
+            needsExpenseAmountInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addExpense('needs');
+            });
+            wantsExpenseAmountInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addExpense('wants');
+            });
+            salaryInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSalaryUpdate();
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target.id === 'modal') closeModal();
             });
         }
 
-        function updateTotals() {
-            const salary = parseFloat(salaryInput.value) || 0;
-            const needsBudget = salary * 0.50;
-            const wantsBudget = salary * 0.30;
+        // Load data for selected month
+        function loadMonthData() {
+            const [year, month] = monthInput.value.split('-');
+            currentMonth = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long', year: 'numeric' });
 
-            const needsTotal = needsExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-            const wantsTotal = wantsExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            if (!monthlyData[currentMonth]) {
+                monthlyData[currentMonth] = {
+                    needsExpenses: [],
+                    wantsExpenses: [],
+                    salary: 0,
+                    savingsBalance: 0,
+                    totalSavings: 0,
+                    currency: 'jd',
+                    carryOver: 0
+                };
+                
+                // Calculate carry over from previous month
+                calculateCarryOver();
+            }
 
-            const currentCurrency = monthlyData[currentMonth]?.currency || 'jd';
-
-            // Update the text content of the amount spans only
-            document.getElementById('needs-total').textContent = needsTotal.toFixed(2);
-            document.getElementById('wants-total').textContent = wantsTotal.toFixed(2);
-
-            const needsLeft = needsBudget - needsTotal;
-            const wantsLeft = wantsBudget - wantsTotal;
-
-            // Update the text content of the amount spans only
-            document.getElementById('needs-left').textContent = needsLeft.toFixed(2);
-            document.getElementById('wants-left').textContent = wantsLeft.toFixed(2);
-
-             // Update the savings amount display (20% of salary) including currency
-            const savingsAmount = salary * 0.20;
-            document.getElementById('savings-amount').textContent = savingsAmount.toFixed(2); // Update only the number
-
-            // The balance is updated separately in loadMonthData and event listeners
+            const monthData = monthlyData[currentMonth];
+            
+            // Update form values
+            salaryInput.value = monthData.salary || 0;
+            extraPayoutInput.value = 0;
+            withdrawAmountInput.value = 0;
+            currencySelect.value = monthData.currency || 'jd';
+            
+            // Update expenses
+            needsExpenses = [...(monthData.needsExpenses || [])];
+            wantsExpenses = [...(monthData.wantsExpenses || [])];
+            
+            // Show carry over info if applicable
+            showCarryOverInfo();
+            
+            // Update UI
+            renderExpenses();
+            updateBudgetDisplay();
+            updateSavingsChart();
+            saveData();
         }
 
-        function addExpense(type) {
-            const nameInput = type === 'needs' ? needsExpenseNameInput : wantsExpenseNameInput;
-            const amountInput = type === 'needs' ? needsExpenseAmountInput : wantsExpenseAmountInput;
-            const expenseList = type === 'needs' ? needsExpenses : wantsExpenses;
-            const listElement = type === 'needs' ? needsList : wantsList;
-
-            const name = nameInput.value.trim();
-            const amount = parseFloat(amountInput.value);
-
-            if (name && !isNaN(amount) && amount > 0) {
-                expenseList.push({ name, amount });
-                // The renderExpenses function now handles placing the currency correctly
-                renderExpenses(listElement, expenseList);
-                updateTotals();
-                saveMonthData();
-                nameInput.value = '';
-                amountInput.value = '';
-            } else {
-                alert('Please enter a valid expense name and amount.');
+        // Calculate carry over from previous month
+        function calculateCarryOver() {
+            const currentDate = new Date(monthInput.value + '-01');
+            const previousDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            const previousMonth = previousDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            if (monthlyData[previousMonth]) {
+                const prevData = monthlyData[previousMonth];
+                const prevSalary = prevData.salary || 0;
+                const prevNeedsSpent = (prevData.needsExpenses || []).reduce((sum, exp) => sum + exp.amount, 0);
+                const prevWantsSpent = (prevData.wantsExpenses || []).reduce((sum, exp) => sum + exp.amount, 0);
+                
+                const needsBudget = prevSalary * 0.5;
+                const wantsBudget = prevSalary * 0.3;
+                
+                const needsRemaining = Math.max(0, needsBudget - prevNeedsSpent);
+                const wantsRemaining = Math.max(0, wantsBudget - prevWantsSpent);
+                
+                const totalCarryOver = needsRemaining + wantsRemaining;
+                  if (totalCarryOver > 0 && !monthlyData[currentMonth].carryOverApplied) {
+                    monthlyData[currentMonth].carryOver = totalCarryOver;
+                    monthlyData[currentMonth].carryOverApplied = true;
+                }
             }
         }
 
-        // Add back the event listeners for the Add Expense buttons
-        addNeedsExpenseButton.addEventListener('click', () => addExpense('needs'));
-        addWantsExpenseButton.addEventListener('click', () => addExpense('wants'));
+        // Show carry over information
+        function showCarryOverInfo() {
+            const carryOverInfo = document.getElementById('carry-over-info');
+            const carryOverAmount = document.getElementById('carry-over-amount');
+            const monthData = monthlyData[currentMonth];
+            
+            if (monthData.carryOver > 0) {
+                const currency = getCurrencySymbol();
+                carryOverAmount.textContent = `${monthData.carryOver.toFixed(2)} ${currency}`;
+                carryOverInfo.classList.add('show');
+            } else {
+                carryOverInfo.classList.remove('show');
+            }
+        }
 
-        // Initialize everything - loadMonthData will handle initial display
-        monthInput.addEventListener('change', loadMonthData); // Use 'change' event for month input
-        initializeSavingsGraph();
-        initializeMonthInput(); // Call the new initialization function
+        // Handle salary update
+        function handleSalaryUpdate() {
+            const salary = parseFloat(salaryInput.value) || 0;
+            monthlyData[currentMonth].salary = salary;
+            
+            // Automatically calculate budget allocations
+            updateBudgetDisplay();
+            saveData();
+            showToast('Salary updated successfully! Budget allocations recalculated.', 'success');
+        }
 
-        // Update history table
-        function updateHistoryTable() {
-            const historyBody = document.getElementById('history-body');
-            historyBody.innerHTML = '';
+        // Handle extra payout
+        function handleExtraPayout() {
+            const extraAmount = parseFloat(extraPayoutInput.value) || 0;
+            if (extraAmount > 0) {
+                monthlyData[currentMonth].salary = (monthlyData[currentMonth].salary || 0) + extraAmount;
+                salaryInput.value = monthlyData[currentMonth].salary;
+                extraPayoutInput.value = 0;
+                
+                updateBudgetDisplay();
+                saveData();
+                showToast(`Extra income of ${extraAmount} ${getCurrencySymbol()} added!`, 'success');
+            }
+        }
 
-            Object.entries(monthlyData).forEach(([month, data]) => {
-                const row = document.createElement('tr');
-                const needsTotal = data.needsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-                const wantsTotal = data.wantsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-                const savings = data.salary - needsTotal - wantsTotal;
-                const currency = data.currency || 'jd';
+        // Handle currency change
+        function handleCurrencyChange() {
+            monthlyData[currentMonth].currency = currencySelect.value;
+            updateBudgetDisplay();
+            saveData();
+        }
 
-                // Currency is added here in the history table rows
-                row.innerHTML = `
-                    <td>${month}</td>
-                    <td>${data.salary.toFixed(2)} ${currency}</td>
-                    <td>${needsTotal.toFixed(2)} ${currency}</td>
-                    <td>${wantsTotal.toFixed(2)} ${currency}</td>
-                    <td>${savings.toFixed(2)} ${currency}</td>
+        // Get currency symbol
+        function getCurrencySymbol() {
+            const currencyMap = {
+                'jd': 'JD',
+                '$': '$',
+                '€': '€',
+                '£': '£'
+            };
+            return currencyMap[monthlyData[currentMonth].currency] || 'JD';
+        }
+
+        // Add expense
+        function addExpense(type) {
+            const nameInput = type === 'needs' ? needsExpenseNameInput : wantsExpenseNameInput;
+            const amountInput = type === 'needs' ? needsExpenseAmountInput : wantsExpenseAmountInput;
+            
+            const name = nameInput.value.trim();
+            const amount = parseFloat(amountInput.value) || 0;
+            
+            if (!name || amount <= 0) {
+                showToast('Please enter a valid expense name and amount.', 'error');
+                return;
+            }
+            
+            const expense = {
+                id: Date.now(),
+                name,
+                amount,
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            if (type === 'needs') {
+                needsExpenses.push(expense);
+                monthlyData[currentMonth].needsExpenses = needsExpenses;
+            } else {
+                wantsExpenses.push(expense);
+                monthlyData[currentMonth].wantsExpenses = wantsExpenses;
+            }
+            
+            // Clear inputs
+            nameInput.value = '';
+            amountInput.value = '';
+            
+            // Update UI - this will automatically update all columns
+            renderExpenses();
+            updateBudgetDisplay();
+            updateSavingsChart();
+            saveData();
+            
+            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} expense added successfully!`, 'success');
+        }
+
+        // Remove expense
+        function removeExpense(type, id) {
+            if (type === 'needs') {
+                needsExpenses = needsExpenses.filter(exp => exp.id !== id);
+                monthlyData[currentMonth].needsExpenses = needsExpenses;
+            } else {
+                wantsExpenses = wantsExpenses.filter(exp => exp.id !== id);
+                monthlyData[currentMonth].wantsExpenses = wantsExpenses;
+            }
+            
+            // Update UI - this will automatically update all columns
+            renderExpenses();
+            updateBudgetDisplay();
+            updateSavingsChart();
+            saveData();
+            
+            showToast('Expense removed successfully!', 'success');
+        }
+
+        // Render expenses
+        function renderExpenses() {
+            renderExpenseList('needs', needsExpenses, needsList);
+            renderExpenseList('wants', wantsExpenses, wantsList);
+        }
+
+        // Render expense list
+        function renderExpenseList(type, expenses, container) {
+            const currency = getCurrencySymbol();
+            container.innerHTML = '';
+            
+            expenses.forEach(expense => {
+                const li = document.createElement('li');
+                li.className = 'expense-item';
+                li.innerHTML = `
+                    <div class="expense-details">
+                        <div class="expense-name">${expense.name}</div>
+                        <div class="expense-amount">${expense.amount.toFixed(2)} ${currency}</div>
+                    </div>
+                    <div class="expense-actions">
+                        <button class="btn btn-danger btn-sm" onclick="removeExpense('${type}', ${expense.id})">×</button>
+                    </div>
                 `;
-                historyBody.appendChild(row);
+                container.appendChild(li);
             });
         }
 
-        // Initialize savings graph
-        function initializeSavingsGraph() {
+        // Update budget display - This is the key function that updates all columns automatically
+        function updateBudgetDisplay() {
+            const monthData = monthlyData[currentMonth];
+            const salary = monthData.salary || 0;
+            const carryOver = monthData.carryOver || 0;
+            const currency = getCurrencySymbol();
+            
+            // Calculate budget allocations
+            const needsBudget = salary * 0.5;
+            const wantsBudget = salary * 0.3;
+            const savingsAmount = salary * 0.2;
+            
+            // Calculate spent amounts
+            const needsSpent = needsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const wantsSpent = wantsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+            
+            // Calculate remaining amounts
+            const needsRemaining = Math.max(0, needsBudget - needsSpent);
+            const wantsRemaining = Math.max(0, wantsBudget - wantsSpent);
+            
+            // Calculate current balance (including carry over and savings)
+            const totalIncome = salary + carryOver;
+            const totalSpent = needsSpent + wantsSpent;
+            const currentBalance = totalIncome - totalSpent;
+            
+            // Calculate total savings (current month savings + carry over savings)
+            const currentSavings = savingsAmount + needsRemaining + wantsRemaining;
+            monthData.savingsBalance = currentSavings;
+            
+            // Calculate total savings across all months
+            const totalSavings = Object.values(monthlyData).reduce((sum, data) => {
+                return sum + (data.savingsBalance || 0);
+            }, 0) - (monthData.totalWithdrawals || 0);
+            
+            monthData.totalSavings = totalSavings;
+            
+            // Update all display elements
+            document.getElementById('total-income').textContent = `${totalIncome.toFixed(2)} ${currency}`;
+            document.getElementById('needs-budget').textContent = `${needsBudget.toFixed(2)} ${currency}`;
+            document.getElementById('wants-budget').textContent = `${wantsBudget.toFixed(2)} ${currency}`;
+            document.getElementById('savings-amount').textContent = `${savingsAmount.toFixed(2)} ${currency}`;
+            document.getElementById('balance').textContent = `${currentBalance.toFixed(2)} ${currency}`;
+            document.getElementById('total-savings').textContent = `${totalSavings.toFixed(2)} ${currency}`;
+            
+            // Update individual card displays
+            document.getElementById('needs-budget-display').textContent = `${needsBudget.toFixed(2)} ${currency}`;
+            document.getElementById('wants-budget-display').textContent = `${wantsBudget.toFixed(2)} ${currency}`;
+            
+            document.getElementById('needs-total').textContent = `${needsSpent.toFixed(2)} ${currency}`;
+            document.getElementById('wants-total').textContent = `${wantsSpent.toFixed(2)} ${currency}`;
+            
+            document.getElementById('needs-left').textContent = `${needsRemaining.toFixed(2)} ${currency}`;
+            document.getElementById('wants-left').textContent = `${wantsRemaining.toFixed(2)} ${currency}`;
+        }
+
+        // Handle withdrawal
+        function handleWithdrawal() {
+            const withdrawAmount = parseFloat(withdrawAmountInput.value) || 0;
+            const totalSavings = monthlyData[currentMonth].totalSavings || 0;
+            
+            if (withdrawAmount <= 0) {
+                showToast('Please enter a valid withdrawal amount.', 'error');
+                return;
+            }
+            
+            if (withdrawAmount > totalSavings) {
+                showToast('Insufficient savings balance.', 'error');
+                return;
+            }
+            
+            monthlyData[currentMonth].totalWithdrawals = (monthlyData[currentMonth].totalWithdrawals || 0) + withdrawAmount;
+            withdrawAmountInput.value = 0;
+            
+            updateBudgetDisplay();
+            updateSavingsChart();
+            saveData();
+            showToast(`Withdrawal of ${withdrawAmount} ${getCurrencySymbol()} processed successfully!`, 'success');
+        }
+
+        // Initialize savings chart
+        function initializeSavingsChart() {
             const ctx = document.getElementById('savingsChart').getContext('2d');
             savingsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Savings Over Time',
+                        label: 'Total Savings',
                         data: [],
-                        borderColor: '#4CAF50',
-                        tension: 0.1
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#ffffff'
-                            },
-                            grid: {
-                                color: '#333'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#ffffff'
-                            },
-                            grid: {
-                                color: '#333'
-                            }
-                        }
-                    },
                     plugins: {
                         legend: {
                             labels: {
-                                color: '#ffffff'
+                                color: '#64748b'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#64748b'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
                             }
                         }
                     }
@@ -526,75 +1103,122 @@
             });
         }
 
-        // Update savings graph
-        function updateSavingsGraph() {
-            const months = Object.keys(monthlyData);
+        // Update savings chart
+        function updateSavingsChart() {
+            const months = Object.keys(monthlyData).sort((a, b) => {
+                const dateA = new Date(a);
+                const dateB = new Date(b);
+                return dateA - dateB;
+            });
+            
             const savingsData = months.map(month => {
                 const data = monthlyData[month];
-                const needsTotal = data.needsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-                const wantsTotal = data.wantsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-                return data.salary - needsTotal - wantsTotal;
+                return (data.totalSavings || 0) - (data.totalWithdrawals || 0);
             });
-
+            
             savingsChart.data.labels = months;
             savingsChart.data.datasets[0].data = savingsData;
             savingsChart.update();
         }
 
-        // Add savings withdrawal section and logic
-        withdrawButton.addEventListener('click', () => {
-            const withdrawAmount = parseFloat(withdrawAmountInput.value) || 0;
-            const currentBalanceText = balanceSpan.textContent.replace(/[^0-9.-]+/g, ""); // Remove currency for calculation
-            const currentBalance = parseFloat(currentBalanceText) || 0;
-
-            if (withdrawAmount > 0 && withdrawAmount <= currentBalance) {
-                const newBalance = currentBalance - withdrawAmount;
-                balanceSpan.textContent = newBalance.toFixed(2); // Update only the number
-                // currency display is handled by updateCurrencyDisplay for the balance span
-                saveMonthData();
-                withdrawAmountInput.value = '0';
-            } else if (withdrawAmount > currentBalance) {
-                alert('Insufficient funds in savings.');
-            } else {
-                alert('Please enter a valid amount to withdraw.');
+        // Show expense history
+        function showExpenseHistory() {
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalTitle.textContent = 'Expense History';
+            
+            const months = Object.keys(monthlyData).sort((a, b) => {
+                const dateA = new Date(a);
+                const dateB = new Date(b);
+                return dateB - dateA; // Most recent first
+            });
+            
+            let historyHTML = '';
+            
+            months.forEach(month => {
+                const data = monthlyData[month];
+                const currency = getCurrencySymbol();
+                const needsTotal = (data.needsExpenses || []).reduce((sum, exp) => sum + exp.amount, 0);
+                const wantsTotal = (data.wantsExpenses || []).reduce((sum, exp) => sum + exp.amount, 0);
+                const totalSpent = needsTotal + wantsTotal;
+                
+                historyHTML += `
+                    <div style="margin-bottom: 2rem; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 0.75rem; background: var(--card-color);">
+                        <h4 style="color: var(--primary-color); margin-bottom: 1rem;">${month}</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div><strong>Salary:</strong> ${(data.salary || 0).toFixed(2)} ${currency}</div>
+                            <div><strong>Needs Spent:</strong> ${needsTotal.toFixed(2)} ${currency}</div>
+                            <div><strong>Wants Spent:</strong> ${wantsTotal.toFixed(2)} ${currency}</div>
+                            <div><strong>Total Spent:</strong> ${totalSpent.toFixed(2)} ${currency}</div>
+                            <div><strong>Savings:</strong> ${((data.savingsBalance || 0) - (data.totalWithdrawals || 0)).toFixed(2)} ${currency}</div>
+                        </div>
+                `;
+                
+                if (data.needsExpenses && data.needsExpenses.length > 0) {
+                    historyHTML += `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Needs Expenses:</strong>
+                            <ul style="margin: 0.5rem 0; padding-left: 1rem;">
+                    `;
+                    data.needsExpenses.forEach(exp => {
+                        historyHTML += `<li>${exp.name}: ${exp.amount.toFixed(2)} ${currency}</li>`;
+                    });
+                    historyHTML += '</ul></div>';
+                }
+                
+                if (data.wantsExpenses && data.wantsExpenses.length > 0) {
+                    historyHTML += `
+                        <div>
+                            <strong>Wants Expenses:</strong>
+                            <ul style="margin: 0.5rem 0; padding-left: 1rem;">
+                    `;
+                    data.wantsExpenses.forEach(exp => {
+                        historyHTML += `<li>${exp.name}: ${exp.amount.toFixed(2)} ${currency}</li>`;
+                    });
+                    historyHTML += '</ul></div>';
+                }
+                
+                historyHTML += '</div>';
+            });
+            
+            if (historyHTML === '') {
+                historyHTML = '<p style="text-align: center; color: var(--text-muted);">No expense history found.</p>';
             }
-        });
+            
+            modalBody.innerHTML = historyHTML;
+            showModal();
+        }
 
-        // Update currency display on the page
-        function updateCurrencyDisplay(currency) {
-             // Update currency in headings and other general currency spans
-             document.querySelectorAll('h2 .currency, .payout-section .currency').forEach(span => {
-                  span.textContent = currency;
-              });
-             // Update currency inside the total/left and balance spans (now in separate spans again)
-            document.getElementById('needs-total').nextElementSibling.textContent = currency;
-            document.getElementById('needs-left').nextElementSibling.textContent = currency;
-            document.getElementById('wants-total').nextElementSibling.textContent = currency;
-            document.getElementById('wants-left').nextElementSibling.textContent = currency;
-            document.getElementById('balance').nextElementSibling.textContent = currency;
-         }
+        // Show modal
+        function showModal() {
+            document.getElementById('modal').classList.add('show');
+        }
 
-        // Add currency selector
-        const currencySelectorDiv = document.createElement('div');
-        currencySelectorDiv.classList.add('payout-section'); // Reuse styling
-        currencySelectorDiv.innerHTML = `
-            <label for="currency-select">Select Currency:</label>
-            <select id="currency-select">
-                ${availableCurrencies.map(currency => `<option value="${currency}">${currency}</option>`).join('')}
-            </select>
-        `;
-        document.body.insertBefore(currencySelectorDiv, document.querySelector('.container')); // Insert before the main container
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
 
-        const currencySelect = document.getElementById('currency-select');
-        currencySelect.addEventListener('change', (event) => {
-            const selectedCurrency = event.target.value;
-            monthlyData[currentMonth].currency = selectedCurrency;
-            updateCurrencyDisplay(selectedCurrency);
-            saveMonthData();
-        });
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
-        // Set initial currency display based on loaded data
-        updateCurrencyDisplay(monthlyData[currentMonth]?.currency || 'jd');
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('monthlyExpenseData', JSON.stringify(monthlyData));
+        }
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
-</html> 
+</html>
