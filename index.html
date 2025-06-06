@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Expense Tracker</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; background-color: #1c1c1c; color: #ffffff; line-height: 1.6; }
+        .container { display: flex; justify-content: space-around; margin-top: 20px; padding: 0 20px; }
+        .column { width: 48%; padding: 20px; border: 1px solid #333; border-radius: 8px; background-color: #2a2a2a; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: #4CAF50; margin-top: 20px; margin-bottom: 30px; }
+        h2 { text-align: center; color: #FFA726; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        h3 { color: #B39DDB; margin-top: 20px; margin-bottom: 10px; }
+        .totals { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.1em; }
+        input[type="number"], input[type="text"] { padding: 10px; margin-bottom: 10px; border: none; border-radius: 4px; background-color: #333; color: #ffffff; width: calc(100% - 22px); display: block; box-sizing: border-box; }
+        button { padding: 10px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease; margin-top: 10px; }
+        button:hover { background-color: #388E3C; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { background-color: #333; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        li span { font-weight: bold; color: #B39DDB; }
+        .payout-section { text-align: center; margin-bottom: 20px; padding: 15px; background-color: #2a2a2a; border: 1px solid #333; border-radius: 8px; margin: 20px auto; width: fit-content; }
+        .payout-section label { font-size: 1.1em; margin-right: 10px; color: #B39DDB; }
+        .payout-section input[type="number"] { width: 150px; display: inline-block; margin-bottom: 0; margin-right: 10px; }
+        .payout-section button { margin-top: 0; }
+
+        .savings-balance { 
+            width: 96%; 
+            margin: 20px auto; 
+            padding: 15px; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            background-color: #2a2a2a; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .savings-balance .total-row { 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            color: #4CAF50;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Monthly Subscriptions and Expenses</h1>
+
+    <div class="payout-section">
+        <label for="salary">Monthly Payout:</label>
+        <input type="number" id="salary" value="420"> <!-- Default value from image -->
+        <button id="add-extra-payout">Add Payout</button>
+    </div>
+
+    <div class="container">
+        <div class="column">
+            <h2 id="needs-heading">Needs (50%) - <span>Calculated Amount</span> jd</h2>
+            <p><em>Examples: Rent, Groceries, Utilities, Transportation, Loan Payments, Insurance</em></p>
+            <ul id="needs-list">
+                <!-- Needs expenses will go here -->
+            </ul>
+            <div>
+                <h3>Add Needs Expense</h3>
+                <input type="text" id="needs-expense-name" placeholder="Expense Name">
+                <input type="number" id="needs-expense-amount" placeholder="Amount">
+                <button id="add-needs-expense">Add Expense</button>
+            </div>
+
+            <div class="totals">
+                <div class="total-row">
+                    <span>Total:</span> <span id="needs-total">0</span> jd
+                </div>
+                <div class="total-row">
+                    <span>Left:</span> <span id="needs-left">0</span> jd
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <h2 id="wants-heading">Wants (30%) - <span>Calculated Amount</span> jd</h2>
+            <p><em>Examples: Entertainment, Dining Out, Hobbies, Subscriptions (streaming, gym), New Gadgets</em></p>
+            <ul id="wants-list">
+                <!-- Wants expenses will go here -->
+            </ul>
+            <div>
+                <h3>Add Wants Expense</h3>
+                <input type="text" id="wants-expense-name" placeholder="Expense Name">
+                <input type="number" id="wants-expense-amount" placeholder="Amount">
+                <button id="add-wants-expense">Add Expense</button>
+            </div>
+
+            <div class="totals">
+                 <div class="total-row">
+                    <span>Total:</span> <span id="wants-total">0</span> jd
+                </div>
+                <div class="total-row">
+                    <span>Left:</span> <span id="wants-left">0</span> jd
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="savings-balance">
+        <div class="total-row">
+            <span>Savings (20%):</span> <span id="savings-amount">0</span> jd
+        </div>
+        <div class="total-row">
+            <span>Balance:</span> <span id="balance">0</span> jd
+        </div>
+    </div>
+
+    <script>
+        const salaryInput = document.getElementById('salary');
+        const needsHeading = document.getElementById('needs-heading').querySelector('span');
+        const wantsHeading = document.getElementById('wants-heading').querySelector('span');
+        const savingsAmountSpan = document.getElementById('savings-amount');
+        const balanceSpan = document.getElementById('balance');
+        const extraPayoutInput = document.getElementById('extra-payout');
+        const addExtraPayoutButton = document.getElementById('add-extra-payout');
+
+        function calculateAndDisplay() {
+            const salary = parseFloat(salaryInput.value) || 0;
+            // The total payout is the initial salary plus any extra payouts added.
+            const totalPayout = salary;
+
+            const needs = totalPayout * 0.50;
+            const wants = totalPayout * 0.30;
+            const savings = totalPayout * 0.20;
+
+            needsHeading.textContent = needs.toFixed(2);
+            wantsHeading.textContent = wants.toFixed(2);
+            savingsAmountSpan.textContent = savings.toFixed(2);
+
+            // Initial balance is the savings amount
+            balanceSpan.textContent = savings.toFixed(2);
+
+            // TODO: Implement logic to calculate total and left for Needs and Wants
+        }
+
+        // Calculate on page load
+        calculateAndDisplay();
+
+        // Calculate when salary input changes
+        salaryInput.addEventListener('input', calculateAndDisplay);
+
+        addExtraPayoutButton.addEventListener('click', () => {
+            const extraAmount = parseFloat(extraPayoutInput.value) || 0;
+            if (extraAmount > 0) {
+                salaryInput.value = parseFloat(salaryInput.value || 0) + extraAmount;
+                calculateAndDisplay();
+                updateTotals(); // Also update totals based on new salary
+                extraPayoutInput.value = '0'; // Clear the extra payout field
+            }
+        });
+
+        const needsList = document.getElementById('needs-list');
+        const wantsList = document.getElementById('wants-list');
+        const needsTotalSpan = document.getElementById('needs-total');
+        const needsLeftSpan = document.getElementById('needs-left');
+        const wantsTotalSpan = document.getElementById('wants-total');
+        const wantsLeftSpan = document.getElementById('wants-left');
+        const needsExpenseNameInput = document.getElementById('needs-expense-name');
+        const needsExpenseAmountInput = document.getElementById('needs-expense-amount');
+        const addNeedsExpenseButton = document.getElementById('add-needs-expense');
+        const wantsExpenseNameInput = document.getElementById('wants-expense-name');
+        const wantsExpenseAmountInput = document.getElementById('wants-expense-amount');
+        const addWantsExpenseButton = document.getElementById('add-wants-expense');
+
+        let needsExpenses = [];
+        let wantsExpenses = [];
+
+        function renderExpenses(listElement, expenses) {
+            listElement.innerHTML = '';
+            expenses.forEach(expense => {
+                const li = document.createElement('li');
+                li.textContent = `${expense.name}: ${expense.amount.toFixed(2)} jd`;
+                listElement.appendChild(li);
+            });
+        }
+
+        function updateTotals() {
+            const salary = parseFloat(salaryInput.value) || 0;
+            const needsBudget = salary * 0.50;
+            const wantsBudget = salary * 0.30;
+
+            const needsTotal = needsExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const wantsTotal = wantsExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+            needsTotalSpan.textContent = needsTotal.toFixed(2);
+            wantsTotalSpan.textContent = wantsTotal.toFixed(2);
+
+            const needsLeft = needsBudget - needsTotal;
+            const wantsLeft = wantsBudget - wantsTotal;
+
+            needsLeftSpan.textContent = needsLeft.toFixed(2);
+            wantsLeftSpan.textContent = wantsLeft.toFixed(2);
+
+            const savings = salary * 0.20;
+            const balance = savings + needsLeft + wantsLeft; // Balance is remaining of all categories
+            balanceSpan.textContent = balance.toFixed(2);
+        }
+
+        function addExpense(type) {
+            const nameInput = type === 'needs' ? needsExpenseNameInput : wantsExpenseNameInput;
+            const amountInput = type === 'needs' ? needsExpenseAmountInput : wantsExpenseAmountInput;
+            const expenseList = type === 'needs' ? needsExpenses : wantsExpenses;
+            const listElement = type === 'needs' ? needsList : wantsList;
+
+            const name = nameInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+
+            if (name && !isNaN(amount) && amount > 0) {
+                expenseList.push({ name, amount });
+                renderExpenses(listElement, expenseList);
+                updateTotals();
+                nameInput.value = '';
+                amountInput.value = '';
+            } else {
+                alert('Please enter a valid expense name and amount.');
+            }
+        }
+
+        addNeedsExpenseButton.addEventListener('click', () => addExpense('needs'));
+        addWantsExpenseButton.addEventListener('click', () => addExpense('wants'));
+
+        // Initial calculation and display
+        calculateAndDisplay();
+        updateTotals();
+
+    </script>
+</body>
+</html> 
