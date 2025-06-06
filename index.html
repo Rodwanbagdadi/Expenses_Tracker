@@ -215,11 +215,15 @@
         .btn-success {
             background: var(--gradient-success);
             color: white;
-        }
-
-        .btn-danger {
+        }        .btn-danger {
             background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
             color: white;
+        }
+
+        .btn-secondary {
+            background: var(--card-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
         }
 
         .btn-sm {
@@ -401,9 +405,7 @@
             display: flex;
             gap: 1rem;
             margin-top: 1.5rem;
-        }
-
-        .toast {
+        }        .toast {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
@@ -414,12 +416,18 @@
             color: var(--text-color);
             box-shadow: var(--shadow-lg);
             z-index: 1001;
-            transform: translateX(100%);
+            transform: translateX(calc(100% + 2rem));
             transition: transform 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .toast.show {
             transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         .toast.success {
@@ -565,10 +573,9 @@
                 <div class="summary-item">
                     <div class="summary-label">Current Balance</div>
                     <div class="summary-value" id="balance">0 JD</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Total Savings</div>
-                    <div class="summary-value" id="total-savings">0 JD</div>
+                </div>                <div class="summary-item">
+                    <div class="summary-label">💰 Total Savings</div>
+                    <div class="summary-value" id="total-savings" style="font-size: 1.75rem; color: #10b981;">0 JD</div>
                 </div>
             </div>
         </div>
@@ -652,11 +659,15 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Savings Management -->
+        </div>        <!-- Savings Management -->
         <div class="control-card" style="margin-bottom: 2rem;">
             <div class="card-title">💳 Savings Management</div>
+            <div style="background: #f0fdf4; border: 1px solid #10b981; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; color: #065f46;">💰 Available Savings:</span>
+                    <span style="font-size: 1.5rem; font-weight: 700; color: #10b981;" id="available-savings">0 JD</span>
+                </div>
+            </div>
             <div class="input-group">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label" for="withdraw-amount">Withdraw Amount:</label>
@@ -673,9 +684,7 @@
                 <canvas id="savingsChart"></canvas>
             </div>
         </div>
-    </div>
-
-    <!-- Modal -->
+    </div>    <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -683,6 +692,39 @@
                 <button class="close-modal" onclick="closeModal()">&times;</button>
             </div>
             <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Category Modal -->
+    <div id="withdrawal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">💳 Add Withdrawal to Expense Category</h3>
+                <button class="close-modal" onclick="closeWithdrawalModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                    Withdrawing <strong id="withdrawal-amount-display">0 JD</strong> from savings.
+                    Which expense category would you like to add this to?
+                </p>
+                <div class="form-group">
+                    <label class="form-label" for="withdrawal-expense-name">Expense Name:</label>
+                    <input type="text" id="withdrawal-expense-name" class="form-input" placeholder="What is this withdrawal for?">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="withdrawal-category">Category:</label>
+                    <select id="withdrawal-category" class="form-input">
+                        <option value="">-- Select Category --</option>
+                        <option value="needs">🏠 Needs (Essential expenses)</option>
+                        <option value="wants">🎯 Wants (Lifestyle expenses)</option>
+                        <option value="none">💰 Don't add to expenses (just withdraw)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="confirmWithdrawal()">Confirm Withdrawal</button>
+                <button class="btn btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -953,9 +995,7 @@
         function renderExpenses() {
             renderExpenseList('needs', needsExpenses, needsList);
             renderExpenseList('wants', wantsExpenses, wantsList);
-        }
-
-        // Render expense list
+        }        // Render expense list
         function renderExpenseList(type, expenses, container) {
             const currency = getCurrencySymbol();
             container.innerHTML = '';
@@ -963,9 +1003,10 @@
             expenses.forEach(expense => {
                 const li = document.createElement('li');
                 li.className = 'expense-item';
+                const savingsIndicator = expense.fromSavings ? ' 💰' : '';
                 li.innerHTML = `
                     <div class="expense-details">
-                        <div class="expense-name">${expense.name}</div>
+                        <div class="expense-name">${expense.name}${savingsIndicator}</div>
                         <div class="expense-amount">${expense.amount.toFixed(2)} ${currency}</div>
                     </div>
                     <div class="expense-actions">
@@ -974,9 +1015,7 @@
                 `;
                 container.appendChild(li);
             });
-        }
-
-        // Update budget display - This is the key function that updates all columns automatically
+        }// Update budget display - This is the key function that updates all columns automatically
         function updateBudgetDisplay() {
             const monthData = monthlyData[currentMonth];
             const salary = monthData.salary || 0;
@@ -1008,7 +1047,7 @@
             // Calculate total savings across all months
             const totalSavings = Object.values(monthlyData).reduce((sum, data) => {
                 return sum + (data.savingsBalance || 0);
-            }, 0) - (monthData.totalWithdrawals || 0);
+            }, 0) - getTotalWithdrawals();
             
             monthData.totalSavings = totalSavings;
             
@@ -1019,6 +1058,12 @@
             document.getElementById('savings-amount').textContent = `${savingsAmount.toFixed(2)} ${currency}`;
             document.getElementById('balance').textContent = `${currentBalance.toFixed(2)} ${currency}`;
             document.getElementById('total-savings').textContent = `${totalSavings.toFixed(2)} ${currency}`;
+            
+            // Update available savings display
+            const availableSavingsElement = document.getElementById('available-savings');
+            if (availableSavingsElement) {
+                availableSavingsElement.textContent = `${Math.max(0, totalSavings).toFixed(2)} ${currency}`;
+            }
             
             // Update individual card displays
             document.getElementById('needs-budget-display').textContent = `${needsBudget.toFixed(2)} ${currency}`;
@@ -1031,10 +1076,17 @@
             document.getElementById('wants-left').textContent = `${wantsRemaining.toFixed(2)} ${currency}`;
         }
 
-        // Handle withdrawal
+        // Get total withdrawals across all months
+        function getTotalWithdrawals() {
+            return Object.values(monthlyData).reduce((sum, data) => {
+                return sum + (data.totalWithdrawals || 0);
+            }, 0);
+        }        // Handle withdrawal
         function handleWithdrawal() {
             const withdrawAmount = parseFloat(withdrawAmountInput.value) || 0;
-            const totalSavings = monthlyData[currentMonth].totalSavings || 0;
+            const totalSavings = Object.values(monthlyData).reduce((sum, data) => {
+                return sum + (data.savingsBalance || 0);
+            }, 0) - getTotalWithdrawals();
             
             if (withdrawAmount <= 0) {
                 showToast('Please enter a valid withdrawal amount.', 'error');
@@ -1046,13 +1098,78 @@
                 return;
             }
             
-            monthlyData[currentMonth].totalWithdrawals = (monthlyData[currentMonth].totalWithdrawals || 0) + withdrawAmount;
-            withdrawAmountInput.value = 0;
+            // Store withdrawal amount globally for the modal
+            window.pendingWithdrawal = withdrawAmount;
             
+            // Show withdrawal category modal
+            showWithdrawalModal(withdrawAmount);
+        }
+
+        // Show withdrawal modal
+        function showWithdrawalModal(amount) {
+            const currency = getCurrencySymbol();
+            document.getElementById('withdrawal-amount-display').textContent = `${amount.toFixed(2)} ${currency}`;
+            document.getElementById('withdrawal-expense-name').value = '';
+            document.getElementById('withdrawal-category').value = '';
+            document.getElementById('withdrawal-modal').classList.add('show');
+        }
+
+        // Close withdrawal modal
+        function closeWithdrawalModal() {
+            document.getElementById('withdrawal-modal').classList.remove('show');
+            window.pendingWithdrawal = 0;
+        }
+
+        // Confirm withdrawal
+        function confirmWithdrawal() {
+            const expenseName = document.getElementById('withdrawal-expense-name').value.trim();
+            const category = document.getElementById('withdrawal-category').value;
+            const withdrawAmount = window.pendingWithdrawal || 0;
+            
+            if (!category) {
+                showToast('Please select a category for this withdrawal.', 'error');
+                return;
+            }
+            
+            if (category !== 'none' && !expenseName) {
+                showToast('Please enter an expense name.', 'error');
+                return;
+            }
+            
+            // Record the withdrawal
+            monthlyData[currentMonth].totalWithdrawals = (monthlyData[currentMonth].totalWithdrawals || 0) + withdrawAmount;
+            
+            // Add to expense category if selected
+            if (category !== 'none' && expenseName) {
+                const expense = {
+                    id: Date.now(),
+                    name: `${expenseName} (From Savings)`,
+                    amount: withdrawAmount,
+                    date: new Date().toISOString().split('T')[0],
+                    fromSavings: true
+                };
+                
+                if (category === 'needs') {
+                    needsExpenses.push(expense);
+                    monthlyData[currentMonth].needsExpenses = needsExpenses;
+                } else if (category === 'wants') {
+                    wantsExpenses.push(expense);
+                    monthlyData[currentMonth].wantsExpenses = wantsExpenses;
+                }
+                
+                renderExpenses();
+            }
+            
+            // Clear withdrawal input and update UI
+            withdrawAmountInput.value = 0;
+            closeWithdrawalModal();
             updateBudgetDisplay();
             updateSavingsChart();
             saveData();
-            showToast(`Withdrawal of ${withdrawAmount} ${getCurrencySymbol()} processed successfully!`, 'success');
+            
+            const currency = getCurrencySymbol();
+            const categoryText = category === 'none' ? 'withdrawal only' : `${category} expenses`;
+            showToast(`Withdrawal of ${withdrawAmount.toFixed(2)} ${currency} processed and added to ${categoryText}!`, 'success');
         }
 
         // Initialize savings chart
@@ -1101,9 +1218,7 @@
                     }
                 }
             });
-        }
-
-        // Update savings chart
+        }        // Update savings chart
         function updateSavingsChart() {
             const months = Object.keys(monthlyData).sort((a, b) => {
                 const dateA = new Date(a);
@@ -1111,9 +1226,14 @@
                 return dateA - dateB;
             });
             
+            let cumulativeSavings = 0;
+            let cumulativeWithdrawals = 0;
+            
             const savingsData = months.map(month => {
                 const data = monthlyData[month];
-                return (data.totalSavings || 0) - (data.totalWithdrawals || 0);
+                cumulativeSavings += (data.savingsBalance || 0);
+                cumulativeWithdrawals += (data.totalWithdrawals || 0);
+                return cumulativeSavings - cumulativeWithdrawals;
             });
             
             savingsChart.data.labels = months;

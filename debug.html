@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Check for Floating Elements</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .debug-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-element {
+            position: fixed;
+            top: 50px;
+            right: 50px;
+            background: red;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            z-index: 9999;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info">
+        <h2>🔍 Debug Tool - Check for Floating Elements</h2>
+        <p>This page will help identify if there are any floating elements or browser issues causing the small window you're seeing.</p>
+        
+        <h3>Tests:</h3>
+        <button onclick="createTestElement()">Create Test Fixed Element</button>
+        <button onclick="removeTestElement()">Remove Test Element</button>
+        <button onclick="checkAllFixedElements()">List All Fixed Elements</button>
+        <button onclick="highlightAllElements()">Highlight All Elements</button>
+        
+        <div id="results" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
+    </div>
+
+    <script>
+        let testElement = null;
+
+        function createTestElement() {
+            removeTestElement();
+            testElement = document.createElement('div');
+            testElement.className = 'test-element';
+            testElement.textContent = 'TEST ELEMENT';
+            testElement.id = 'debug-test-element';
+            document.body.appendChild(testElement);
+            updateResults('Test element created at top-right corner');
+        }
+
+        function removeTestElement() {
+            if (testElement) {
+                testElement.remove();
+                testElement = null;
+                updateResults('Test element removed');
+            }
+        }
+
+        function checkAllFixedElements() {
+            const allElements = document.querySelectorAll('*');
+            const fixedElements = [];
+            
+            allElements.forEach(el => {
+                const style = window.getComputedStyle(el);
+                if (style.position === 'fixed' || style.position === 'absolute') {
+                    fixedElements.push({
+                        tagName: el.tagName,
+                        id: el.id || 'no-id',
+                        className: el.className || 'no-class',
+                        position: style.position,
+                        top: style.top,
+                        right: style.right,
+                        bottom: style.bottom,
+                        left: style.left,
+                        zIndex: style.zIndex
+                    });
+                }
+            });
+            
+            let result = `<h4>Fixed/Absolute positioned elements found: ${fixedElements.length}</h4>`;
+            fixedElements.forEach(el => {
+                result += `<div style="margin: 5px 0; padding: 5px; background: white; border-left: 3px solid #007bff;">
+                    <strong>${el.tagName}</strong> - ID: ${el.id}, Class: ${el.className}<br>
+                    Position: ${el.position}, Z-Index: ${el.zIndex}<br>
+                    Top: ${el.top}, Right: ${el.right}, Bottom: ${el.bottom}, Left: ${el.left}
+                </div>`;
+            });
+            
+            updateResults(result);
+        }
+
+        function highlightAllElements() {
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                const style = window.getComputedStyle(el);
+                if (style.position === 'fixed' || style.position === 'absolute') {
+                    el.style.outline = '3px solid red';
+                    el.style.background = 'rgba(255, 0, 0, 0.1)';
+                }
+            });
+            
+            setTimeout(() => {
+                allElements.forEach(el => {
+                    el.style.outline = '';
+                    el.style.background = '';
+                });
+            }, 3000);
+            
+            updateResults('All fixed/absolute elements highlighted in red for 3 seconds');
+        }
+
+        function updateResults(content) {
+            document.getElementById('results').innerHTML = content;
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            updateResults('Debug tool loaded. Click buttons above to run tests.');
+        });
+    </script>
+</body>
+</html>
