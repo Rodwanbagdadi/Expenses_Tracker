@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monthly Expense Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; margin: 0; background-color: #1c1c1c; color: #ffffff; line-height: 1.6; }
         .container { display: flex; justify-content: space-around; margin-top: 20px; padding: 0 20px; }
@@ -39,20 +40,85 @@
             color: #4CAF50;
         }
 
+        .month-selector {
+            text-align: center;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        .month-selector input[type="month"] {
+            padding: 8px;
+            margin: 0 10px;
+            background-color: #333;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+        }
+        .history-section {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: 90%;
+        }
+        .history-section h2 {
+            color: #4CAF50;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .history-table th, .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        .history-table th {
+            background-color: #333;
+            color: #4CAF50;
+        }
+        .savings-graph {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: 90%;
+        }
+        .savings-graph h2 {
+            color: #4CAF50;
+        }
+        .graph-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
     </style>
 </head>
 <body>
     <h1>Monthly Subscriptions and Expenses</h1>
 
+    <div class="month-selector">
+        <label for="month-select">Select Month:</label>
+        <input type="month" id="month-input">
+    </div>
+
     <div class="payout-section">
         <label for="salary">Monthly Payout:</label>
-        <input type="number" id="salary" value="420"> <!-- Default value from image -->
+        <input type="number" id="salary" value="0"> <!-- Default value from image was 420, setting to 0 for fresh start -->
+        <label for="extra-payout">Add Extra Payout:</label>
+        <input type="number" id="extra-payout" value="0">
         <button id="add-extra-payout">Add Payout</button>
     </div>
 
     <div class="container">
         <div class="column">
-            <h2 id="needs-heading">Needs (50%) - <span>Calculated Amount</span> jd</h2>
+            <h2 id="needs-heading">Needs (50%) - <span>Calculated Amount</span> <span class="currency">jd</span></h2>
             <p><em>Examples: Rent, Groceries, Utilities, Transportation, Loan Payments, Insurance</em></p>
             <ul id="needs-list">
                 <!-- Needs expenses will go here -->
@@ -66,16 +132,16 @@
 
             <div class="totals">
                 <div class="total-row">
-                    <span>Total:</span> <span id="needs-total">0</span> jd
+                    <span>Total:</span> <span id="needs-total">0<span class="currency">jd</span></span> 
                 </div>
                 <div class="total-row">
-                    <span>Left:</span> <span id="needs-left">0</span> jd
+                    <span>Left:</span> <span id="needs-left">0<span class="currency">jd</span></span> 
                 </div>
             </div>
         </div>
 
         <div class="column">
-            <h2 id="wants-heading">Wants (30%) - <span>Calculated Amount</span> jd</h2>
+            <h2 id="wants-heading">Wants (30%) - <span>Calculated Amount</span> <span class="currency">jd</span></h2>
             <p><em>Examples: Entertainment, Dining Out, Hobbies, Subscriptions (streaming, gym), New Gadgets</em></p>
             <ul id="wants-list">
                 <!-- Wants expenses will go here -->
@@ -89,10 +155,10 @@
 
             <div class="totals">
                  <div class="total-row">
-                    <span>Total:</span> <span id="wants-total">0</span> jd
+                    <span>Total:</span> <span id="wants-total">0<span class="currency">jd</span></span> 
                 </div>
                 <div class="total-row">
-                    <span>Left:</span> <span id="wants-left">0</span> jd
+                    <span>Left:</span> <span id="wants-left">0<span class="currency">jd</span></span> 
                 </div>
             </div>
         </div>
@@ -100,11 +166,42 @@
 
     <div class="savings-balance">
         <div class="total-row">
-            <span>Savings (20%):</span> <span id="savings-amount">0</span> jd
+            <span>Savings (20%):</span> <span id="savings-amount">0</span> <span class="currency">jd</span>
         </div>
         <div class="total-row">
-            <span>Balance:</span> <span id="balance">0</span> jd
+            <span>Balance:</span> <span id="balance">0</span> <span class="currency">jd</span>
         </div>
+    </div>
+
+    <div class="payout-section">
+        <label for="withdraw-amount">Withdraw from Savings:</label>
+        <input type="number" id="withdraw-amount" value="0">
+        <button id="withdraw-button">Withdraw</button>
+    </div>
+
+    <div class="savings-graph">
+        <h2>Savings History</h2>
+        <div class="graph-container">
+            <canvas id="savingsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h2>Expense History</h2>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Total Income</th>
+                    <th>Needs Total</th>
+                    <th>Wants Total</th>
+                    <th>Savings</th>
+                </tr>
+            </thead>
+            <tbody id="history-body">
+                <!-- History rows will be populated by JavaScript -->
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -115,6 +212,103 @@
         const balanceSpan = document.getElementById('balance');
         const extraPayoutInput = document.getElementById('extra-payout');
         const addExtraPayoutButton = document.getElementById('add-extra-payout');
+        const monthInput = document.getElementById('month-input');
+        const withdrawAmountInput = document.getElementById('withdraw-amount');
+        const withdrawButton = document.getElementById('withdraw-button');
+
+        // Add new variables for month management
+        let currentMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+        let monthlyData = {};
+        let savingsChart;
+        const currencySpan = document.querySelectorAll('.currency');
+        const availableCurrencies = ['jd', '$', '€', '£']; // Add more currencies here
+
+        // Initialize the month selector (now using month input)
+        function initializeMonthInput() {
+            // Set the initial value of the month input to the current month
+            const today = new Date();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const year = today.getFullYear();
+            monthInput.value = `${year}-${month}`;
+            currentMonth = new Date(monthInput.value + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            // Ensure current month exists in data
+            if (!monthlyData[currentMonth]) {
+                 monthlyData[currentMonth] = {
+                    needsExpenses: [],
+                    wantsExpenses: [],
+                    salary: 0,
+                    savingsBalance: 0, // Initialize savings balance for the month
+                    currency: 'jd' // Default currency
+                };
+            }
+            loadMonthData(); // Load data for the initially selected month
+        }
+
+        // Load data for selected month from month input
+        function loadMonthData() {
+            const [year, month] = monthInput.value.split('-');
+            currentMonth = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            // If the month doesn't exist in monthlyData, create it
+            if (!monthlyData[currentMonth]) {
+                 monthlyData[currentMonth] = {
+                    needsExpenses: [],
+                    wantsExpenses: [],
+                    salary: 0,
+                    savingsBalance: 0,
+                    currency: monthlyData[Object.keys(monthlyData)[0]]?.currency || 'jd' // Use currency from first month if available, otherwise default
+                };
+            }
+
+            const monthData = monthlyData[currentMonth];
+
+            // Update salary input field
+            salaryInput.value = monthData.salary || 0;
+            extraPayoutInput.value = '0'; // Clear extra payout input on month change
+
+            // Update expenses
+            needsExpenses = monthData.needsExpenses || [];
+            wantsExpenses = monthData.wantsExpenses || [];
+
+            // Update UI
+            renderExpenses(needsList, needsExpenses);
+            renderExpenses(wantsList, wantsExpenses);
+            calculateAndDisplay(); // This updates budgets, not balance directly
+            updateTotals();
+
+            // Update balance with saved savings balance, adding initial salary if it hasn't been added
+            const savedBalance = monthData.savingsBalance || 0;
+            const initialSalary = monthData.salary || 0;
+            // Only add initial salary to balance if balance is 0 (assuming balance is 0 for a new month)
+            if (savedBalance === 0 && initialSalary > 0) {
+                 balanceSpan.textContent = initialSalary.toFixed(2) + ' ' + (monthlyData[currentMonth]?.currency || 'jd');
+                 monthlyData[currentMonth].savingsBalance = parseFloat(balanceSpan.textContent); // Save the initial balance
+            } else {
+                balanceSpan.textContent = savedBalance.toFixed(2) + ' ' + (monthlyData[currentMonth]?.currency || 'jd');
+            }
+
+            withdrawAmountInput.value = '0'; // Clear withdraw input on month change
+
+            // Update currency display
+            updateCurrencyDisplay(monthData.currency || 'jd');
+
+            updateHistoryTable();
+            updateSavingsGraph();
+        }
+
+        // Save current month data
+        function saveMonthData() {
+            monthlyData[currentMonth] = {
+                needsExpenses: needsExpenses,
+                wantsExpenses: wantsExpenses,
+                salary: parseFloat(salaryInput.value) || 0,
+                savingsBalance: parseFloat(balanceSpan.textContent) || 0, // Save the current balance
+                currency: monthlyData[currentMonth]?.currency || 'jd' // Save the current currency
+            };
+            updateHistoryTable();
+            updateSavingsGraph();
+        }
 
         function calculateAndDisplay() {
             const salary = parseFloat(salaryInput.value) || 0;
@@ -127,26 +321,51 @@
 
             needsHeading.textContent = needs.toFixed(2);
             wantsHeading.textContent = wants.toFixed(2);
-            savingsAmountSpan.textContent = savings.toFixed(2);
-
-            // Initial balance is the savings amount
-            balanceSpan.textContent = savings.toFixed(2);
+            // savingsAmountSpan.textContent = savings.toFixed(2); // This was confusing, removing it
 
             // TODO: Implement logic to calculate total and left for Needs and Wants
         }
 
-        // Calculate on page load
-        calculateAndDisplay();
+        // Calculate when salary input changes - This now handles initial salary and updates balance
+        salaryInput.addEventListener('input', () => {
+            const oldSalary = monthlyData[currentMonth]?.salary || 0; // Get salary before change
+            const newSalary = parseFloat(salaryInput.value) || 0;
+            const salaryDifference = newSalary - oldSalary;
 
-        // Calculate when salary input changes
-        salaryInput.addEventListener('input', calculateAndDisplay);
+            // Update salary in monthlyData immediately
+            monthlyData[currentMonth].salary = newSalary;
 
+            // Add the difference to the balance
+            const currentBalanceText = balanceSpan.textContent.replace(/[^0-9.-]+/g, ""); // Remove currency for calculation
+            const currentBalance = parseFloat(currentBalanceText) || 0;
+            const newBalance = currentBalance + salaryDifference;
+            balanceSpan.textContent = newBalance.toFixed(2); // Update only the number
+            // currency display is handled by updateCurrencyDisplay for the balance span
+
+            // Recalculate budgets based on new total salary
+            calculateAndDisplay();
+            updateTotals();
+            saveMonthData(); // Save data when salary changes
+        });
+
+        // Modified addExtraPayoutButton listener
         addExtraPayoutButton.addEventListener('click', () => {
             const extraAmount = parseFloat(extraPayoutInput.value) || 0;
             if (extraAmount > 0) {
-                salaryInput.value = parseFloat(salaryInput.value || 0) + extraAmount;
-                calculateAndDisplay();
-                updateTotals(); // Also update totals based on new salary
+                // Add extra payout to the current month's salary in monthlyData
+                monthlyData[currentMonth].salary = (monthlyData[currentMonth].salary || 0) + extraAmount;
+                salaryInput.value = monthlyData[currentMonth].salary.toFixed(2);
+
+                // Add extra payout directly to the balance as well
+                const currentBalanceText = balanceSpan.textContent.replace(/[^0-9.-]+/g, ""); // Remove currency for calculation
+                const currentBalance = parseFloat(currentBalanceText) || 0;
+                const newBalance = currentBalance + extraAmount;
+                 balanceSpan.textContent = newBalance.toFixed(2); // Update only the number
+                 // currency display is handled by updateCurrencyDisplay for the balance span
+
+                calculateAndDisplay(); // Recalculate budgets based on new total salary
+                updateTotals(); // Update totals and left amounts
+                saveMonthData(); // Save the updated data
                 extraPayoutInput.value = '0'; // Clear the extra payout field
             }
         });
@@ -169,9 +388,10 @@
 
         function renderExpenses(listElement, expenses) {
             listElement.innerHTML = '';
+            const currentCurrency = monthlyData[currentMonth]?.currency || 'jd';
             expenses.forEach(expense => {
                 const li = document.createElement('li');
-                li.textContent = `${expense.name}: ${expense.amount.toFixed(2)} jd`;
+                li.textContent = `${expense.name}: ${expense.amount.toFixed(2)} ${currentCurrency}`;
                 listElement.appendChild(li);
             });
         }
@@ -184,18 +404,24 @@
             const needsTotal = needsExpenses.reduce((sum, expense) => sum + expense.amount, 0);
             const wantsTotal = wantsExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-            needsTotalSpan.textContent = needsTotal.toFixed(2);
-            wantsTotalSpan.textContent = wantsTotal.toFixed(2);
+            const currentCurrency = monthlyData[currentMonth]?.currency || 'jd';
+
+            // Update the text content of the amount spans only
+            document.getElementById('needs-total').textContent = needsTotal.toFixed(2);
+            document.getElementById('wants-total').textContent = wantsTotal.toFixed(2);
 
             const needsLeft = needsBudget - needsTotal;
             const wantsLeft = wantsBudget - wantsTotal;
 
-            needsLeftSpan.textContent = needsLeft.toFixed(2);
-            wantsLeftSpan.textContent = wantsLeft.toFixed(2);
+            // Update the text content of the amount spans only
+            document.getElementById('needs-left').textContent = needsLeft.toFixed(2);
+            document.getElementById('wants-left').textContent = wantsLeft.toFixed(2);
 
-            const savings = salary * 0.20;
-            const balance = savings + needsLeft + wantsLeft; // Balance is remaining of all categories
-            balanceSpan.textContent = balance.toFixed(2);
+             // Update the savings amount display (20% of salary) including currency
+            const savingsAmount = salary * 0.20;
+            document.getElementById('savings-amount').textContent = savingsAmount.toFixed(2); // Update only the number
+
+            // The balance is updated separately in loadMonthData and event listeners
         }
 
         function addExpense(type) {
@@ -209,8 +435,10 @@
 
             if (name && !isNaN(amount) && amount > 0) {
                 expenseList.push({ name, amount });
+                // The renderExpenses function now handles placing the currency correctly
                 renderExpenses(listElement, expenseList);
                 updateTotals();
+                saveMonthData();
                 nameInput.value = '';
                 amountInput.value = '';
             } else {
@@ -218,13 +446,155 @@
             }
         }
 
+        // Add back the event listeners for the Add Expense buttons
         addNeedsExpenseButton.addEventListener('click', () => addExpense('needs'));
         addWantsExpenseButton.addEventListener('click', () => addExpense('wants'));
 
-        // Initial calculation and display
-        calculateAndDisplay();
-        updateTotals();
+        // Initialize everything - loadMonthData will handle initial display
+        monthInput.addEventListener('change', loadMonthData); // Use 'change' event for month input
+        initializeSavingsGraph();
+        initializeMonthInput(); // Call the new initialization function
 
+        // Update history table
+        function updateHistoryTable() {
+            const historyBody = document.getElementById('history-body');
+            historyBody.innerHTML = '';
+
+            Object.entries(monthlyData).forEach(([month, data]) => {
+                const row = document.createElement('tr');
+                const needsTotal = data.needsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                const wantsTotal = data.wantsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                const savings = data.salary - needsTotal - wantsTotal;
+                const currency = data.currency || 'jd';
+
+                // Currency is added here in the history table rows
+                row.innerHTML = `
+                    <td>${month}</td>
+                    <td>${data.salary.toFixed(2)} ${currency}</td>
+                    <td>${needsTotal.toFixed(2)} ${currency}</td>
+                    <td>${wantsTotal.toFixed(2)} ${currency}</td>
+                    <td>${savings.toFixed(2)} ${currency}</td>
+                `;
+                historyBody.appendChild(row);
+            });
+        }
+
+        // Initialize savings graph
+        function initializeSavingsGraph() {
+            const ctx = document.getElementById('savingsChart').getContext('2d');
+            savingsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Savings Over Time',
+                        data: [],
+                        borderColor: '#4CAF50',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: '#333'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: '#333'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update savings graph
+        function updateSavingsGraph() {
+            const months = Object.keys(monthlyData);
+            const savingsData = months.map(month => {
+                const data = monthlyData[month];
+                const needsTotal = data.needsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                const wantsTotal = data.wantsExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+                return data.salary - needsTotal - wantsTotal;
+            });
+
+            savingsChart.data.labels = months;
+            savingsChart.data.datasets[0].data = savingsData;
+            savingsChart.update();
+        }
+
+        // Add savings withdrawal section and logic
+        withdrawButton.addEventListener('click', () => {
+            const withdrawAmount = parseFloat(withdrawAmountInput.value) || 0;
+            const currentBalanceText = balanceSpan.textContent.replace(/[^0-9.-]+/g, ""); // Remove currency for calculation
+            const currentBalance = parseFloat(currentBalanceText) || 0;
+
+            if (withdrawAmount > 0 && withdrawAmount <= currentBalance) {
+                const newBalance = currentBalance - withdrawAmount;
+                balanceSpan.textContent = newBalance.toFixed(2); // Update only the number
+                // currency display is handled by updateCurrencyDisplay for the balance span
+                saveMonthData();
+                withdrawAmountInput.value = '0';
+            } else if (withdrawAmount > currentBalance) {
+                alert('Insufficient funds in savings.');
+            } else {
+                alert('Please enter a valid amount to withdraw.');
+            }
+        });
+
+        // Update currency display on the page
+        function updateCurrencyDisplay(currency) {
+             // Update currency in headings and other general currency spans
+             document.querySelectorAll('h2 .currency, .payout-section .currency').forEach(span => {
+                  span.textContent = currency;
+              });
+             // Update currency inside the total/left and balance spans (now in separate spans again)
+            document.getElementById('needs-total').nextElementSibling.textContent = currency;
+            document.getElementById('needs-left').nextElementSibling.textContent = currency;
+            document.getElementById('wants-total').nextElementSibling.textContent = currency;
+            document.getElementById('wants-left').nextElementSibling.textContent = currency;
+            document.getElementById('balance').nextElementSibling.textContent = currency;
+         }
+
+        // Add currency selector
+        const currencySelectorDiv = document.createElement('div');
+        currencySelectorDiv.classList.add('payout-section'); // Reuse styling
+        currencySelectorDiv.innerHTML = `
+            <label for="currency-select">Select Currency:</label>
+            <select id="currency-select">
+                ${availableCurrencies.map(currency => `<option value="${currency}">${currency}</option>`).join('')}
+            </select>
+        `;
+        document.body.insertBefore(currencySelectorDiv, document.querySelector('.container')); // Insert before the main container
+
+        const currencySelect = document.getElementById('currency-select');
+        currencySelect.addEventListener('change', (event) => {
+            const selectedCurrency = event.target.value;
+            monthlyData[currentMonth].currency = selectedCurrency;
+            updateCurrencyDisplay(selectedCurrency);
+            saveMonthData();
+        });
+
+        // Set initial currency display based on loaded data
+        updateCurrencyDisplay(monthlyData[currentMonth]?.currency || 'jd');
     </script>
 </body>
 </html> 
