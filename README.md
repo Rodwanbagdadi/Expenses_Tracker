@@ -1,6 +1,6 @@
 # 💰 Monthly Expense Tracker
 
-🔗 **Live Demo**: (https://rodwanbagdadi.github.io/Expenses_app/)
+🔗 **Live Demo**: (https://rodwanbagdadi.github.io/Expenses_Tracker/)
 
 A comprehensive personal finance management app built with vanilla HTML, CSS, and JavaScript. Track your monthly expenses using the proven **50/30/20 budgeting rule** with automatic calculations, savings tracking, and historical data visualization.
 
