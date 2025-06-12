@@ -45,3 +45,87 @@ A comprehensive personal finance management app built with vanilla HTML, CSS, an
 - **Design**: Modern dark theme with gradient effects
 - **Responsive**: CSS Grid and Flexbox for all screen sizes
 
+## 💡 How to Use
+
+### 1. **Set Your Monthly Income**
+- Enter your base salary
+- Add any extra income for the month
+- Budget allocations calculate automatically
+
+### 2. **Track Your Expenses**
+- Add expenses to "Needs" or "Wants" categories
+- Watch your remaining budget update in real-time
+- See your savings grow automatically
+
+### 3. **Manage Your Savings**
+- View accumulated savings prominently displayed
+- Make withdrawals with categorization options
+- Track where your savings are being spent
+
+### 4. **Review Your History**
+- Switch between different months
+- View complete expense history
+- Analyze savings trends with interactive charts
+
+## 🎨 Features in Detail
+
+### **Automatic Budget Calculations**
+When you enter your salary, the app automatically:
+- Calculates 50% for essential needs
+- Allocates 30% for lifestyle wants  
+- Sets aside 20% for savings
+- Updates all displays instantly
+
+### **Smart Carry-Over System**
+- Unspent money from previous months automatically carries forward
+- Visual indicators show carry-over amounts
+- Helps build savings over time
+
+### **Comprehensive Tracking**
+- **Real-time balance updates** as you add expenses
+- **Visual expense indicators** show savings-funded purchases
+- **Monthly summaries** with total income, spending, and savings
+- **Interactive charts** for long-term trend analysis
+
+## 🎯 Perfect For
+
+- **Personal Finance Beginners**: Easy-to-understand 50/30/20 rule
+- **Budget Trackers**: Detailed expense categorization
+- **Savings Goals**: Visual progress tracking
+- **Financial Planning**: Historical data analysis
+- **Privacy-Conscious Users**: Local-only data storage
+
+## 📱 Responsive Design
+
+The app works seamlessly across all devices:
+- **Desktop**: Full-featured interface with multi-column layout
+- **Tablet**: Optimized grid layout for medium screens
+- **Mobile**: Single-column layout with touch-friendly controls
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+- Report bugs
+- Suggest new features
+- Submit pull requests
+- Improve documentation
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🛡️ Browser Support
+
+- ✅ Chrome (Latest)
+- ✅ Firefox (Latest)  
+- ✅ Safari (Latest)
+- ✅ Edge (Latest)
+- ✅ Mobile browsers
+
+## 📧 Support
+
+If you encounter any issues or have questions, please open an issue on GitHub.
+
+---
+
+**Take control of your finances with smart budgeting! 💪** 
